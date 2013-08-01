@@ -1,0 +1,9 @@
+{
+	"folders":
+	[
+		{
+			"path": "/home/kcuzner/Projects/AVR/popnmusic",
+            "file_exclude_patterns": [ "*.lst" ]
+		}
+	]
+}

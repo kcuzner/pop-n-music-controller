@@ -1,0 +1,7 @@
+*.o
+*.out
+*.out.map
+*.hex
+*.lst
+
+*sublime-workspace
