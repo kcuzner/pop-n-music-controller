@@ -29,6 +29,7 @@ LIBS:opto
 LIBS:atmel
 LIBS:contrib
 LIBS:valves
+LIBS:popnmusic-cache
 EELAYER 27 0
 EELAYER END
 $Descr A4 11693 8268
@@ -63,17 +64,6 @@ F 1 "CONN_7" V 8770 1150 60  0000 C CNN
 F 2 "~" H 8700 1150 60  0000 C CNN
 F 3 "~" H 8700 1150 60  0000 C CNN
 	1    8700 1150
-	1    0    0    -1  
-$EndComp
-$Comp
-L CONN_9 P2
-U 1 1 51FD5101
-P 8700 2850
-F 0 "P2" V 8650 2850 60  0000 C CNN
-F 1 "CONN_9" V 8750 2850 60  0000 C CNN
-F 2 "~" H 8700 2850 60  0000 C CNN
-F 3 "~" H 8700 2850 60  0000 C CNN
-	1    8700 2850
 	1    0    0    -1  
 $EndComp
 Text Notes 8900 1100 0    60   ~ 0
@@ -379,8 +369,6 @@ F 3 "" H 4800 5850 60  0000 C CNN
 $EndComp
 Wire Wire Line
 	4800 5750 4800 5850
-NoConn ~ 4450 4350
-NoConn ~ 4450 4450
 NoConn ~ 4450 2850
 NoConn ~ 4450 2750
 $Comp
@@ -431,4 +419,31 @@ Wire Wire Line
 	8100 4650 8100 5000
 Wire Wire Line
 	8350 5000 8350 4650
+Text Label 5100 4350 0    60   ~ 0
+START
+Text Label 5100 4450 0    60   ~ 0
+SELECT
+Wire Wire Line
+	4450 4350 5100 4350
+Wire Wire Line
+	4450 4450 5100 4450
+$Comp
+L CONN_11 P?
+U 1 1 51FD60E3
+P 8700 2950
+F 0 "P?" V 8650 2950 60  0000 C CNN
+F 1 "CONN_11" V 8750 2950 60  0000 C CNN
+F 2 "~" H 8700 2950 60  0000 C CNN
+F 3 "~" H 8700 2950 60  0000 C CNN
+	1    8700 2950
+	1    0    0    -1  
+$EndComp
+Text Label 8150 3350 2    60   ~ 0
+START
+Text Label 8150 3450 2    60   ~ 0
+SELECT
+Wire Wire Line
+	8150 3350 8350 3350
+Wire Wire Line
+	8350 3450 8150 3450
 $EndSCHEMATC

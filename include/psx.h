@@ -28,6 +28,11 @@
 void psx_setup(void);
 
 /**
+ * Asks the bus to hold ack low until the next clock cycle
+ */
+void psx_ack(void);
+
+/**
  * Sends data via the PSX bus
  * @param data Data character to send
  */

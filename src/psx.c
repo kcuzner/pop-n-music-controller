@@ -80,6 +80,10 @@ char psx_send(unsigned char data)
     return sendState.size;
 }
 
+void psx_ack(void)
+{
+}
+
 ISR(INT1_vect)
 {
     //reset our transmission state
