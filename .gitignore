@@ -4,4 +4,6 @@
 *.hex
 *.lst
 
-*sublime-workspace
+*.sublime-workspace
+
+*.orig
