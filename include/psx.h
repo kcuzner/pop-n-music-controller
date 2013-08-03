@@ -15,6 +15,7 @@
 #define _PSX_H_
 
 #define PSX_PORT        PORTD
+#define PSX_DDR         DDRD
 #define PSX_ATT_MASK    0x08
 #define PSX_CLK_MASK    0x04
 #define PSX_DATA_MASK   0x02
@@ -30,7 +31,7 @@ void psx_setup(void);
  * Sends data via the PSX bus
  * @param data Data character to send
  */
-void psx_send(unsigned char data);
+char psx_send(unsigned char data);
 
 /**
  * Called when the att pin is signaled low. This should be implemented wherever
