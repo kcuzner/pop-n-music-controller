@@ -7,131 +7,144 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#define PSX_DDR_IN_MASK     ~(PSX_ATT_MASK | PSX_CLK_MASK | PSX_CMD_MASK)
-#define PSX_DDR_OUT_MASK    PSX_DATA_MASK | PSX_ACK_MASK
+static const uint8_t ATT_SIGNALED = 1 << 1;
+static const uint8_t RECEIVED_READY = 1 << 2;
 
-unsigned char buffer[5];
-/**
- * Holds the send state for the psx bus
- */
-struct
-{
-    /**
-     * Length of the buffer
-     */
-    unsigned size:3;
-    /**
-     * Current byte to send
-     */
-    unsigned index:3;
-    /**
-     * Mask for the current bit to send
-     */
-    unsigned char sendMask;
-} sendState;
+static volatile uint8_t sendSize, sendIndex, sendMask;
+static volatile uint8_t sendBuffer[5];
+static volatile uint8_t recvMask, recvBuffer;
+static volatile uint8_t received;
+
+static volatile uint8_t flags;
 
 void psx_setup(void)
 {
-    sendState.size = sendState.index = 0;
-    sendState.sendMask = 0x01; //we send lsb first, shifting left
+    //reset all flags
+    flags = 0;
+
+    //set up buffers
+    sendSize = sendIndex = 0;
+    sendMask = 0x01;
+    recvBuffer = received = 0;
+    recvMask = 0x01;
 
     //set up the direction
-    PSX_DDR &= PSX_DDR_IN_MASK;
-    PSX_DDR |= PSX_DDR_OUT_MASK;
+    PSX_DDR &= ~(PSX_ATT_MASK | PSX_CLK_MASK);
+    PSX_PORT |= PSX_ATT_MASK | PSX_CLK_MASK;
 
     //set up the interrupts
     //we listen for a high to low level transition on ATT (int1)
     //we listen to both levels (falling, we change; rising, we read) (int0)
-    EICRA = ISC11 | ISC00;
-    EIMSK = INT1 | INT0;
-
-}
-
-/**
- * Sets the data line (1)
- */
-static void set_data(void)
-{
-    //we set the data to be an input
-    PSX_DDR &= ~PSX_DATA_MASK;
-    PSX_PORT |= PSX_DATA_MASK; //pull-up enabled
-}
-
-/**
- * Resets the data line (0)
- */
-static void reset_data(void)
-{
-    //we set the data to be an output
-    PSX_DDR |= PSX_DATA_MASK;
-    PSX_PORT &= ~PSX_DATA_MASK; //pull it low
-}
-
-char psx_send(unsigned char data)
-{
-    if (sendState.size == 5) {
-        return 0;
-    }
-
-    buffer[sendState.size] = data;
-
-    sendState.size++;
-
-    return sendState.size;
+    EICRA = (1 << ISC11) | (1 << ISC00);
+    EIMSK = (1 << INT0) | (1 << INT1);
 }
 
 void psx_ack(void)
 {
 }
 
+char psx_send(uint8_t data)
+{
+    if (sendSize == 5) {
+        return 0;
+    }
+
+    sendBuffer[sendSize] = data;
+
+    sendSize++;
+
+    return sendSize;
+}
+
+/**
+ * PSX_ATT falls low
+ */
 ISR(INT1_vect)
 {
     //reset our transmission state
-    sendState.size = 0; //we set this first so thing is transmitted
-    sendState.index = 0;
-    sendState.sendMask = 0x01;
+    sendSize = 0; //we set this first so thing is transmitted
+    sendIndex = 0;
+    sendMask = 0x01;
+
+    if (recvMask == 0x20) {
+        PORTB = 0x08;
+    }
+
+    //reset our receive state
+    recvBuffer = 0;
+    recvMask = 0x01;
 
     //notify that we have had our attention called
-    psx_on_att();
+    //psx_on_att();
 }
 
+/**
+ * PSX_CLK rises high or falls low
+ */
 ISR(INT0_vect)
 {
-
-    if (PSX_PORT & PSX_CLK_MASK)
+    if (!(PSX_PIN & PSX_ATT_MASK))
     {
-        //rising edge: we can receive
+        //this isn't meant for us
+        return;
+    }
+
+    if (PSX_PIN & PSX_CLK_MASK)
+    {
+        //rising edge: we read cmd
+        if (PSX_PIN & PSX_CMD_MASK)
+        {
+            //recvBuffer |= recvMask;
+        }
+
+        if (recvMask == 0x80) {
+            
+        }
+
+        if (recvMask == 0x80) //we finished
+        {
+            received = recvBuffer; //copy what we got
+            recvBuffer = 0; //reset the buffer
+            recvMask = 0x01; //reset the mask
+            //flags |= RECEIVED_READY;
+        }
+        else
+        {
+            recvMask = recvMask << 1; //shift over for next bit
+        }
     }
     else
     {
-        if (sendState.index >= sendState.size)
+        //falling edge: we write data
+        if (sendIndex >= sendSize)
         {
-            //we have nothing to send
+            //nothing to send
             return;
         }
 
-        //falling edge: we send
-        if (buffer[sendState.index] & sendState.sendMask)
+        if (sendBuffer[sendIndex] & sendMask)
         {
-            //it is high
-            set_data();
+            //data becomes input with pull up
+            PSX_DDR &= ~PSX_DATA_MASK;
+            PSX_PORT |= PSX_DATA_MASK;
         }
         else
         {
-            //it is low
-            reset_data();
+            //data pulled low
+            PSX_DDR |= PSX_DATA_MASK;
+            PSX_PORT &= ~PSX_DATA_MASK;
         }
 
-        //we now increment our things
-        if (sendState.sendMask == 0x80)
+        if (sendMask == 0x80)
         {
-            //we have completed a byte and need to reset and increment
-            sendState.sendMask = 0x01;
-            sendState.index++;
+            //next byte
+            sendMask = 0x01;
+            sendIndex++;
         }
         else
         {
-            sendState.sendMask = sendState.sendMask << 1;
+            //increment send mask
+            sendMask <<= 1;
         }
     }
 }

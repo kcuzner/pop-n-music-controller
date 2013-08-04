@@ -13,19 +13,33 @@
 
 #include "psx.h"
 
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+
 int main(void)
 {
+    //set up psx
+    psx_setup();
+
+    //enable interrupts
+    sei();
+
+    //we will use pb3 as a flash test
+    DDRB |= 0x08; //pb3 output
+
+    while(1);
+
     return 0;
 }
 
 void psx_on_att(void)
 {
-    //send our greeting
-    psx_send(0xFF); //the impression of being idle
-    psx_send(0x41); //identifier as a digital pad
-    psx_send(0x5a); //ready to send data
+}
 
-    //send button state
-    psx_send(0xff);
-    psx_send(0xff);
+void psx_on_recv(uint8_t received)
+{
+    if (received == 0x01)
+    {
+    }
 }
