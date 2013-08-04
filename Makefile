@@ -93,7 +93,7 @@ INC=-Iinclude
 # libraries to link in (e.g. -lmylib)
 LIBS=
 
-F_CPU=20000000
+F_CPU=8000000
 
 # Optimization level, 
 # use s (size opt), 1, 2, 3 or 0 (off)
