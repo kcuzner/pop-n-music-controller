@@ -18,9 +18,8 @@
  * - If sendMask != 0, the ISR ands the byte with the sendmask, sets data accordingly, and shifts sendMask left, no rotate
  */
 
-volatile uint8_t sendByte, sendMask;
-volatile uint8_t recvByte, recvMask;
 volatile uint8_t flags;
+volatile uint8_t received;
 volatile uint8_t ackCounter;
 
 void psx_setup(void)
@@ -29,26 +28,19 @@ void psx_setup(void)
     flags = 0;
 
     //set up buffers
-    sendByte = sendMask = 0;
-    recvByte = recvMask = 0;
-    flags = 0;
+    received = 0;
+    ackCounter = 0;
 
-    //set up the direction
-    PSX_DDR &= ~(PSX_ATT_MASK | PSX_CLK_MASK);
-    PSX_PORT |= PSX_ATT_MASK | PSX_CLK_MASK;
-
-    //set up the interrupts
-    //we listen for a high to low level transition on ATT (int1)
-    //we listen to both levels (falling, we change; rising, we read) (int0)
-    EICRA = (1 << ISC11) | (1 << ISC00);
-    EIMSK = (1 << INT0) | (1 << INT1);
+    //set up spi for slave mode
+    DDRB |= (1 < PB2); //miso is output
+    SPCR = (1 << SPIE) | (1 << SPE) | (1 << CPOL) | (1 << CPHA); //enable spi interrupt, enable spi, read on rising edge, clock polarity inverted
 }
 
 void psx_main(void)
 {
-    if ((flags & PSX_FLAG_RECVD) && !recvMask)
+    if (flags & PSX_FLAG_RECVD)
     {
-        psx_on_recv(recvByte);
+        psx_on_recv(received);
     }
 
     flags = 0;
@@ -61,27 +53,14 @@ void psx_ack(void)
 
 char psx_send(uint8_t data)
 {
-    if (sendMask != 0x00)
-    {
-        return 0;
-    }
-
-    sendByte = data;
-    sendMask = 0x01; //tell it to start
-
     return 1;
 }
 
 /**
- * PSX_ATT falls low
+ * Serial transfer complete on SPI
  */
-ISR(INT1_vect)
+ISR(SPI_STC_vect)
 {
-    /*if (recvMask != 0x00) {
-       //PORTB |= 0x08;
-    }*/
-
-    //start receive
-    recvByte = 0;
-    recvMask = 0x01;
+    received = SPDR;
+    flags |= PSX_FLAG_RECVD;
 }

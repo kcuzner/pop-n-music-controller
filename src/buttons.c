@@ -59,10 +59,10 @@ uint8_t* buttons_get_data(void)
     state[2] &= PORTC & BTN_PC_X ? 0xbf : 0xff; //read x
     state[2] &= PORTB & BTN_PB_CIRCLE ? 0xdf : 0xff; //read circle
     state[2] &= PORTB & BTN_PB_TRIANGLE ? 0xef : 0xff; //read triangle
-    state[2] &= PORTB & BTN_PB_R1 ? 0xf7 : 0xff; //read r1
+    state[2] &= PORTC & BTN_PC_R1 ? 0xf7 : 0xff; //read r1
     state[2] &= PORTC & BTN_PC_L1 ? 0xfb : 0xff; //read l1
     state[2] &= PORTC & BTN_PC_R2 ? 0xfd : 0xff; //read r2
-    state[2] &= PORTC & BTN_PC_L2 ? 0xfe : 0xff; //read l2
+    state[2] &= PORTD & BTN_PD_L2 ? 0xfe : 0xff; //read l2
 
     for(i = 3; i < DATA_LENGTH; i++)
     {

@@ -25,8 +25,9 @@ int main(void)
     //enable interrupts
     sei();
 
-    //we will use pb3 as a flash test
-    DDRB |= 0x08; //pb3 output
+    //we will use pd0 as a flash test
+    DDRD |= (1 << PD0);
+    
 
     while(1)
     {
@@ -42,8 +43,8 @@ void psx_on_att(void)
 
 void psx_on_recv(uint8_t received)
 {
-    if (received == 0x01)
+    if (received == 0x80)
     {
-        psx_ack();
+        PORTD ^= (1 << PD0);
     }
 }
