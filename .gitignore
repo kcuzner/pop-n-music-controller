@@ -5,6 +5,8 @@
 *.hex
 *.lst
 
+obj
+
 #sublime files
 *.sublime-workspace
 

@@ -85,7 +85,7 @@ PROJECTNAME=popnmusic
 # (list all files to compile, e.g. 'a.c b.cpp as.S'):
 # Use .cc, .cpp or .C suffix for C++ files, use .S 
 # (NOT .s !!!) for assembly source code files.
-PRJSRC=src/main.c src/psx.c src/buttons.c
+PRJSRC=src/main.c src/psx.c src/buttons.c src/psx_fast.S
 
 # additional includes (e.g. -I/path/to/mydir)
 INC=-Iinclude
@@ -93,7 +93,7 @@ INC=-Iinclude
 # libraries to link in (e.g. -lmylib)
 LIBS=
 
-F_CPU=8000000
+F_CPU=20000000
 
 # Optimization level, 
 # use s (size opt), 1, 2, 3 or 0 (off)
