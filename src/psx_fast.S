@@ -10,6 +10,12 @@
 
 #define sreg_save   r2
 
+;; Flags to signal the rest of the psx stuff "async"
+.extern flags
+
+;; When > 0, it should be decremented each rising clock edge. When 0, ack should be released
+.extern ackCounter
+
 ;; Byte to send (psx.c)
 .extern sendByte
 ;; Mask for current bit sending (psx.c)
@@ -49,7 +55,7 @@ INT0_vect:
         lds     r24, sendByte
         and     r24, r25
         ;;if result of AND is 0, pull data low
-        breq    INT0_vect_data_low
+        breq    INT0_vect_write_low
 
         INT0_vect_write_high:
             ;;we allow data to float high by clearing the ddr
@@ -79,10 +85,14 @@ INT0_vect:
         sbic    _SFR_IO_ADDR(PSX_PIN), PSX_CMD
         or      r24, r25
         sts     recvByte, r24
-        ;;we shift the mask (r25) and store it
+        ;;we shift the mask (r25)
         lsl     r25
-        ;brne    INT0_vect_read_store
-        
+        ;;if, after shifting, the mask is zero, we set the flag for received
+        brne    INT0_vect_read_store
+        lds     r24, flags
+        ori     r24, PSX_FLAG_RECVD
+        sts     flags, r24
+
         INT0_vect_read_store:
             sts     recvMask, r25
 

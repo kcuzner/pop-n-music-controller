@@ -21,4 +21,7 @@
 #define PSX_CMD_MASK    1 << PD0
 #define PSX_ACK_MASK    1 << PD4
 
+#define PSX_FLAG_RECVD  0x01
+#define PSX_FLAG_SENT   0x02
+
 #endif

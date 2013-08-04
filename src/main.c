@@ -28,7 +28,10 @@ int main(void)
     //we will use pb3 as a flash test
     DDRB |= 0x08; //pb3 output
 
-    while(1);
+    while(1)
+    {
+        psx_main();
+    }
 
     return 0;
 }
@@ -41,5 +44,6 @@ void psx_on_recv(uint8_t received)
 {
     if (received == 0x01)
     {
+        psx_ack();
     }
 }

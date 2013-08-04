@@ -22,6 +22,11 @@
 void psx_setup(void);
 
 /**
+ * PSX Main loop function. Should be called as often as possible so bytes aren't missed
+ */
+void psx_main(void);
+
+/**
  * Asks the bus to hold ack low until the next clock cycle
  */
 void psx_ack(void);

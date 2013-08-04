@@ -21,10 +21,10 @@
 volatile uint8_t sendByte, sendMask;
 volatile uint8_t recvByte, recvMask;
 volatile uint8_t flags;
+volatile uint8_t ackCounter;
 
 void psx_setup(void)
 {
-    unsigned char i;
     //reset all flags
     flags = 0;
 
@@ -44,8 +44,19 @@ void psx_setup(void)
     EIMSK = (1 << INT0) | (1 << INT1);
 }
 
+void psx_main(void)
+{
+    if ((flags & PSX_FLAG_RECVD) && !recvMask)
+    {
+        psx_on_recv(recvByte);
+    }
+
+    flags = 0;
+}
+
 void psx_ack(void)
 {
+    ackCounter = 2; //this is arbitrary...wait for two clock cycles before releasing ack
 }
 
 char psx_send(uint8_t data)
@@ -57,6 +68,8 @@ char psx_send(uint8_t data)
 
     sendByte = data;
     sendMask = 0x01; //tell it to start
+
+    return 1;
 }
 
 /**
@@ -64,9 +77,9 @@ char psx_send(uint8_t data)
  */
 ISR(INT1_vect)
 {
-    if (recvMask != 0x00) {
-       PORTB |= 0x08;
-    }
+    /*if (recvMask != 0x00) {
+       //PORTB |= 0x08;
+    }*/
 
     //start receive
     recvByte = 0;
