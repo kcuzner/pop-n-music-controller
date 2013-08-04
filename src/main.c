@@ -43,7 +43,7 @@ void psx_on_att(void)
 
 void psx_on_recv(uint8_t received)
 {
-    if (received == 0x80)
+    if (received == 0x01)
     {
         PORTD ^= (1 << PD0);
     }

@@ -33,7 +33,8 @@ void psx_setup(void)
 
     //set up spi for slave mode
     DDRB |= (1 < PB2); //miso is output
-    SPCR = (1 << SPIE) | (1 << SPE) | (1 << CPOL) | (1 << CPHA); //enable spi interrupt, enable spi, read on rising edge, clock polarity inverted
+    //enable spi interrupt, enable spi, data order reversed, read on rising edge, clock polarity inverted
+    SPCR = (1 << SPIE) | (1 << SPE) | (1 << DORD) | (1 << CPOL) | (1 << CPHA);
 }
 
 void psx_main(void)
@@ -48,7 +49,11 @@ void psx_main(void)
 
 void psx_ack(void)
 {
-    ackCounter = 2; //this is arbitrary...wait for two clock cycles before releasing ack
+    //we want it to go low for 10uS
+    //source of this number:
+    //  2uS is clock period for 500Khz and 10uS is clock period for 100Khz
+    //  Since 2uS * 8 == 16 > 10, we can use 10uS and avoid bleeding into the
+    //  next byte.
 }
 
 char psx_send(uint8_t data)
