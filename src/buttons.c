@@ -9,7 +9,7 @@
  * SLCT           STRT UP   RGHT DOWN LEFT      = buttonsL
  * L2   R2    L1  R1   /\   O    X    |_|       = buttonsH
  *
- * All bits are active high
+ * All bits are active high since our MISO is inverted
  */
 
 //buttonsL
@@ -74,26 +74,30 @@ void buttons_update(void)
     uint8_t tPinB = PINB;
     uint8_t tPinC = PINC;
     uint8_t tPinD = PIND;
+
+    //since we have pullups turned on, each of these are pressed when the
+    //corrisponding pin is low. Thus, if the AND passes, the button is not
+    //pressed
     
     tempL = flags & BUTTONS_STATUS_LRD ? (1 << BUTTON_RIGHT) | (1 << BUTTON_DOWN) | (1 << BUTTON_LEFT) : 0x00; //initially, just the rdl flag
     tempH = 0x00; //default is all that all are unpressed
 
     //portb first
-    tempH |= tPinB & BTN_PB_CIRCLE ? (1 << BUTTON_CIRCLE) : 0x00; //read circle
-    tempH |= tPinB & BTN_PB_TRIANGLE ? (1 << BUTTON_TRIANGLE) : 0x00; //read triangle
+    tempH |= tPinB & BTN_PB_CIRCLE ? 0x00 : (1 << BUTTON_CIRCLE); //read circle
+    tempH |= tPinB & BTN_PB_TRIANGLE ? 0x00 : (1 << BUTTON_TRIANGLE); //read triangle
 
     //portc
-    tempL |= tPinC & BTN_PC_UP ? (1 << BUTTON_UP) : 0x00; //read up
-    tempH |= tPinC & BTN_PC_SQUARE ? (1 << BUTTON_SQUARE) : 0x00; //read square
-    tempH |= tPinC & BTN_PC_X ? (1 << BUTTON_X) : 0x00; //read x
-    tempH |= tPinC & BTN_PC_R1 ? (1 << BUTTON_R1) : 0x00; //read r1
-    tempH |= tPinC & BTN_PC_L1 ? (1 << BUTTON_L1) : 0x00; //read l1
-    tempH |= tPinC & BTN_PC_R2 ? (1 << BUTTON_R2) : 0x00; //read r2
+    tempL |= tPinC & BTN_PC_UP ? 0x00 : (1 << BUTTON_UP); //read up
+    tempH |= tPinC & BTN_PC_SQUARE ? 0x00 : (1 << BUTTON_SQUARE); //read square
+    tempH |= tPinC & BTN_PC_X ? 0x00 : (1 << BUTTON_X); //read x
+    tempH |= tPinC & BTN_PC_R1 ? 0x00 : (1 << BUTTON_R1); //read r1
+    tempH |= tPinC & BTN_PC_L1 ? 0x00 : (1 << BUTTON_L1); //read l1
+    tempH |= tPinC & BTN_PC_R2 ? 0x00 : (1 << BUTTON_R2); //read r2
 
     //last portd
-    tempL |= tPinD & BTN_PD_START ? (1 << BUTTON_STRT) : 0x00; //read start
-    tempL |= tPinD & BTN_PD_SELECT ? (1 << BUTTON_SLCT) : 0x00; //read select
-    tempH |= tPinD & BTN_PD_L2 ? (1 << BUTTON_L2) : 0x00; //read l2
+    tempL |= tPinD & BTN_PD_START ? 0x00 : (1 << BUTTON_STRT); //read start
+    tempL |= tPinD & BTN_PD_SELECT ? 0x00 : (1 << BUTTON_SLCT); //read select
+    tempH |= tPinD & BTN_PD_L2 ? 0x00 : (1 << BUTTON_L2); //read l2
 
     //we update here to do it all at once
     buttonsL = tempL;

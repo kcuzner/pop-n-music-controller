@@ -81,7 +81,6 @@ void psx_on_recv(uint8_t received)
             psx_ack();
             //next thing we send is upper button byte
             psx_send(buttonsH);
-            PORTD ^= (1 << PD0);
         }
     }
 

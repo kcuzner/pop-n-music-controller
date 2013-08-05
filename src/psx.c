@@ -70,8 +70,6 @@ ISR(SPI_STC_vect)
 {
     received = SPDR;
     flags |= PSX_FLAG_RECVD;
-
-    //psx_ack();
 }
 
 ISR(TIMER0_OVF_vect)
