@@ -45,6 +45,10 @@ void psx_on_recv(uint8_t received)
 {
     if (received == 0x01)
     {
-        PORTD ^= (1 << PD0);
+        psx_ack();
+    }
+    else if (received == 0x42)
+    {
+        PORTD |= (1 << PD0);
     }
 }

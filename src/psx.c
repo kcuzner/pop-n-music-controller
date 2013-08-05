@@ -8,19 +8,12 @@
 #include <avr/interrupt.h>
 
 /**
- * The following variables are required by the psx_fast file which contains
- * our ISRs so that they run reasonably
- *
- * As an optimization, they work as follows
- * Send:
- * - A byte is queued to be sent by setting sendByte to the value and sendMask to 0x01
- * - If the sendMask != 0 when queuing occurs, it returns false
- * - If sendMask != 0, the ISR ands the byte with the sendmask, sets data accordingly, and shifts sendMask left, no rotate
+ * Initial value for tmr0 giving us a 10uS delay
  */
+const uint8_t tmr0Initial = 255 - (F_CPU / 100000);
 
-volatile uint8_t flags;
-volatile uint8_t received;
-volatile uint8_t ackCounter;
+static volatile uint8_t flags;
+static volatile uint8_t received;
 
 void psx_setup(void)
 {
@@ -29,12 +22,17 @@ void psx_setup(void)
 
     //set up buffers
     received = 0;
-    ackCounter = 0;
+
+    //set up ack
+    PSX_DDR |= (1 << PSX_ACK);
 
     //set up spi for slave mode
-    DDRB |= (1 < PB2); //miso is output
+    DDRB |= (1 << PB2); //miso is output
     //enable spi interrupt, enable spi, data order reversed, read on rising edge, clock polarity inverted
     SPCR = (1 << SPIE) | (1 << SPE) | (1 << DORD) | (1 << CPOL) | (1 << CPHA);
+
+    //enable timer interrupts
+    TIMSK0 = (1 << TOIE0);
 }
 
 void psx_main(void)
@@ -54,6 +52,10 @@ void psx_ack(void)
     //  2uS is clock period for 500Khz and 10uS is clock period for 100Khz
     //  Since 2uS * 8 == 16 > 10, we can use 10uS and avoid bleeding into the
     //  next byte.
+    
+    PSX_PORT |= (1 << PSX_ACK); //turn on ack
+    TCNT0 = 0;
+    TCCR0B = (1 << CS00); //no prescaler
 }
 
 char psx_send(uint8_t data)
@@ -68,4 +70,13 @@ ISR(SPI_STC_vect)
 {
     received = SPDR;
     flags |= PSX_FLAG_RECVD;
+
+    //psx_ack();
+}
+
+ISR(TIMER0_OVF_vect)
+{
+    //turn off the timer
+    TCCR0B = 0;
+    PSX_PORT &= ~(1 << PSX_ACK); //turn on ack
 }

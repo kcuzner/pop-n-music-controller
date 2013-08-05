@@ -11,8 +11,6 @@
 
 #define PSX_ACK         PD4
 
-#define PSX_ACK_MASK    1 << PD4
-
 #define PSX_FLAG_RECVD  0x01
 #define PSX_FLAG_SENT   0x02
 
