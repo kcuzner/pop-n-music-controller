@@ -11,17 +11,13 @@
  * We are a digital controller
  */
 #define PSX_DEVICE_TYPE     0x41
-/**
- * We have 3 bytes of response, including the 0x5A introduction byte
- */
-#define DATA_LENGTH         3
 
 /******
  * PORTB buttons
  ******/
 
-#define BTN_PB_TRIANGLE     0x01
-#define BTN_PB_CIRCLE       0x02
+#define BTN_PB_TRIANGLE     (1 << PB0)
+#define BTN_PB_CIRCLE       (1 << PB1)
 
 #define BTN_B_MASK          BTN_PB_TRIANGLE | BTN_PB_CIRCLE
 
@@ -48,6 +44,10 @@
 
 #define BTN_D_MASK          BTN_PD_L2 | BTN_PD_START | BTN_PD_SELECT
 
+
+extern uint8_t buttonsL;
+extern uint8_t buttonsH;
+
 /**
  * Button setup function
  */
@@ -64,9 +64,8 @@ void buttons_set_lrd_pressed(void);
 void buttons_reset_lrd_pressed(void);
 
 /**
- * Returns the button data
- * @return      Pointer to an array of DATA_LENGTH length
+ * Updates the button bytes which are exposed through this header file
  */
-uint8_t* buttons_get_data(void);
+void buttons_update(void);
 
 #endif

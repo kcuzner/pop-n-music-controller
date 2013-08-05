@@ -43,10 +43,4 @@ void psx_send(uint8_t data);
  */
 void psx_on_recv(uint8_t received);
 
-/**
- * Called when the att pin is signaled low. This should be implemented wherever
- * the PSX bus is going to be used
- */
-void psx_on_att(void);
-
 #endif //_PSX_H_

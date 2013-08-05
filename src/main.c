@@ -25,6 +25,9 @@ int main(void)
     //set up psx
     psx_setup();
 
+    //set up buttons
+    buttons_setup();
+
     //enable interrupts
     sei();
 
@@ -34,14 +37,11 @@ int main(void)
 
     while(1)
     {
+        buttons_update();
         psx_main();
     }
 
     return 0;
-}
-
-void psx_on_att(void)
-{
 }
 
 void psx_on_recv(uint8_t received)
@@ -70,8 +70,8 @@ void psx_on_recv(uint8_t received)
         if (received == 0x00)
         {
             psx_ack();
-            //next thing we send is upper button byte
-            psx_send(0x00);
+            //next thing we send is lower button byte
+            psx_send(buttonsL);
         }
     }
     else if (byteNumber == 3)
@@ -79,9 +79,9 @@ void psx_on_recv(uint8_t received)
         if (received == 0x00)
         {
             psx_ack();
-            //next thing we send is lower button byte
-            psx_send(0x00);
-            PORTD |= (1 << PD0);
+            //next thing we send is upper button byte
+            psx_send(buttonsH);
+            PORTD ^= (1 << PD0);
         }
     }
 
