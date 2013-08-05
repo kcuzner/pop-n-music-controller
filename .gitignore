@@ -1,7 +1,20 @@
+#build files
 *.o
 *.out
 *.out.map
 *.hex
 *.lst
 
-*sublime-workspace
+obj
+
+#sublime files
+*.sublime-workspace
+
+#git files
+*.orig
+
+#kicad files
+kicad/*.000
+kicad/*.bak
+kicad/*.net
+
