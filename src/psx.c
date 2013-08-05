@@ -27,7 +27,7 @@ void psx_setup(void)
     PSX_DDR |= (1 << PSX_ACK);
 
     //set up spi for slave mode
-    DDRB |= (1 << PB2); //miso is output
+    DDRB |= (1 << PB4); //miso is output
     //enable spi interrupt, enable spi, data order reversed, read on rising edge, clock polarity inverted
     SPCR = (1 << SPIE) | (1 << SPE) | (1 << DORD) | (1 << CPOL) | (1 << CPHA);
 
@@ -58,9 +58,9 @@ void psx_ack(void)
     TCCR0B = (1 << CS00); //no prescaler
 }
 
-char psx_send(uint8_t data)
+void psx_send(uint8_t data)
 {
-    return 1;
+    SPDR = data;
 }
 
 /**

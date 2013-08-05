@@ -10,7 +10,7 @@
 /**
  * We are a digital controller
  */
-#define PSX_DEVICE_TYPE     0x42
+#define PSX_DEVICE_TYPE     0x41
 /**
  * We have 3 bytes of response, including the 0x5A introduction byte
  */

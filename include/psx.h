@@ -35,7 +35,7 @@ void psx_ack(void);
  * Sends data via the PSX bus
  * @param data Data character to send
  */
-char psx_send(uint8_t data);
+void psx_send(uint8_t data);
 
 /**
  * Called when something has been received over the psx bus

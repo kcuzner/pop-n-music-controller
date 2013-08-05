@@ -12,6 +12,9 @@
  */
 
 #include "psx.h"
+#include "buttons.h"
+
+#include <stdint.h>
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -43,12 +46,44 @@ void psx_on_att(void)
 
 void psx_on_recv(uint8_t received)
 {
+    static uint8_t byteNumber = 0;
+
     if (received == 0x01)
     {
+        byteNumber = 0; //reset back to start again
         psx_ack();
+        //the next byte we send is our device type
+        psx_send(~PSX_DEVICE_TYPE);
     }
-    else if (received == 0x42)
+
+    if (byteNumber == 1)
     {
-        PORTD |= (1 << PD0);
+        if (received == 0x42)
+        {
+            psx_ack();
+            //the next byte we send is our preamble
+            psx_send(0xa5);
+        }
     }
+    else if (byteNumber == 2)
+    {
+        if (received == 0x00)
+        {
+            psx_ack();
+            //next thing we send is upper button byte
+            psx_send(0x00);
+        }
+    }
+    else if (byteNumber == 3)
+    {
+        if (received == 0x00)
+        {
+            psx_ack();
+            //next thing we send is lower button byte
+            psx_send(0x00);
+            PORTD |= (1 << PD0);
+        }
+    }
+
+    byteNumber++;
 }
