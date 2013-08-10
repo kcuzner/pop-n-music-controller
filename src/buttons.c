@@ -4,32 +4,6 @@
 
 #define BUTTONS_STATUS_LRD      0x01
 
-/**
- * Bit0 Bit1 Bit2 Bit3 Bit4 Bit5 Bit6 Bit7
- * SLCT           STRT UP   RGHT DOWN LEFT      = buttonsL
- * L2   R2    L1  R1   /\   O    X    |_|       = buttonsH
- *
- * All bits are active high since our MISO is inverted
- */
-
-//buttonsL
-#define BUTTON_SLCT     0
-#define BUTTON_STRT     3
-#define BUTTON_UP       4
-#define BUTTON_RIGHT    5
-#define BUTTON_DOWN     6
-#define BUTTON_LEFT     7
-
-//buttonsH
-#define BUTTON_L2       0
-#define BUTTON_R2       1
-#define BUTTON_L1       2
-#define BUTTON_R1       3
-#define BUTTON_TRIANGLE 4
-#define BUTTON_CIRCLE   5
-#define BUTTON_X        6
-#define BUTTON_SQUARE   7
-
 uint8_t buttonsL;
 uint8_t buttonsH;
 

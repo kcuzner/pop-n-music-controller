@@ -8,7 +8,11 @@
  *   - left, down, and right buttons not pressed
  * - Playstation mode:
  *   - 9 Buttons mapped the way that they are supposed to be
- *   - left, down, and right buttons are pressed   
+ *   - left, down, and right buttons are pressed  
+ *
+ * To switch the mode of the controller, start and select should both be
+ * held down for 3 seconds. PD0 will be on for emulator mode, PD1 will be
+ * on for PSX mode.
  */
 
 #include "psx.h"
@@ -31,8 +35,8 @@ int main(void)
     //enable interrupts
     sei();
 
-    //we will use pd0 as a flash test
-    DDRD |= (1 << PD0);
+    //PD0 and PD1 are the LEDs
+    DDRD |= (1 << PD0) | (1 << PD1);
     
 
     while(1)
