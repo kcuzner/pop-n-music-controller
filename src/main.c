@@ -39,13 +39,32 @@
 #define CLK_SOURCE          ((1 << CS12) | (1 << CS10))
 
 
-#define PSX_FLAG            0x01
+#define EMU_FLAG            0x01
 
 uint8_t flags;
 
+void sync_status()
+{
+    if (flags & EMU_FLAG)
+    {
+        //we are in emulator mode. PD0 only is lit
+        PORTD &= ~(1 << PD1);
+        PORTD |= (1 << PD0);
+        buttons_reset_lrd_pressed();
+    }
+    else
+    {
+        //we are not in emulator mode. PD1 only is lit
+        PORTD &= ~(1 << PD0);
+        PORTD |= (1 << PD1);
+        buttons_set_lrd_pressed();
+    }
+}
+
 int main(void)
 {
-    flags = 0;
+    //by default, we are in emulator mode
+    flags = EMU_FLAG;
 
     //set up psx
     psx_setup();
@@ -54,7 +73,7 @@ int main(void)
     buttons_setup();
 
     //initially, we are in emulator mode: LRD unpressed
-    buttons_reset_lrd_pressed();
+    sync_status();
 
     //pin change interrupts on PD6 and PD7 (start & select)
     PCMSK2 |= PC_INT_MASK2;
@@ -68,11 +87,9 @@ int main(void)
 
     //PD0 and PD1 are the LEDs
     DDRD |= (1 << PD0) | (1 << PD1);
-    //PORTD |= (1 << PD1);
 
     while(1)
     {
-        //PORTD ^= (1 << PD1);
         buttons_update();
         psx_main();
     }
@@ -125,21 +142,29 @@ void psx_on_recv(uint8_t received)
 
 ISR(PCINT2_vect)
 {
-    if (PIND & SWITCH_MASK_D)
+    if ((~PIND & SWITCH_MASK_D) == SWITCH_MASK_D)
     {
         //the two switches are pressed
         if (!(TCCR1B & (1 << CS12 | 1 << CS11 | 1 << CS10)))
         {
             TCNT1 = DELAY_3S;
             TCCR1B |= CLK_SOURCE;
-            PORTD |= (1 << PD1);
+            //both leds are turned on
+            PORTD |= (1 << PD0) | (1 << PD1);
         }
+    }
+    else
+    {
+        //we stop the timer...it will star again later
+        sync_status(); //reset our status
+        TCCR1B &= ~((1 << CS12) | (1 << CS11) | (1 << CS10));
     }
 }
 
 ISR(TIMER1_OVF_vect)
 {
     //if we managed to overflow, we switch modes and switch off the clock
-    PORTD &= ~(1 << PD1);
+    flags ^= EMU_FLAG;
+    sync_status();
     TCCR1B &= ~((1 << CS12) | (1 << CS11) | (1 << CS10));
 }
