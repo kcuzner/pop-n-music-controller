@@ -24,23 +24,55 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 
+#define PC_INT_MASK2        ((1 << PCINT22) | (1 << PCINT23))
+#define SWITCH_MASK_D       ((1 << PD6) | (1 << PD7))
+
+#if (BTN_PD_SELECT | BTN_PD_START) != SWITCH_MASK_D
+#error Select and start are not located on PD6 and PD7
+#endif
+
+//a 3 second delay at clk/1024 when clk = 8Mhz means that it requires 0x5B8D
+//clock cycles to do that. Subtracting that from 0xffff, we get 0xa472 for the
+//initial counter value. If the count can complete without being interrupted,
+//then the buttons have been pressed for a sufficient amount of time
+#define DELAY_3S            0xA472
+#define CLK_SOURCE          ((1 << CS12) | (1 << CS10))
+
+
+#define PSX_FLAG            0x01
+
+uint8_t flags;
+
 int main(void)
 {
+    flags = 0;
+
     //set up psx
     psx_setup();
 
     //set up buttons
     buttons_setup();
 
+    //initially, we are in emulator mode: LRD unpressed
+    buttons_reset_lrd_pressed();
+
+    //pin change interrupts on PD6 and PD7 (start & select)
+    PCMSK2 |= PC_INT_MASK2;
+    PCICR |= (1 << PCIE2);
+
+    //we use timer1 for handling the 3 second wait
+    TIMSK1 |= (1 << TOIE1);
+
     //enable interrupts
     sei();
 
     //PD0 and PD1 are the LEDs
     DDRD |= (1 << PD0) | (1 << PD1);
-    
+    //PORTD |= (1 << PD1);
 
     while(1)
     {
+        //PORTD ^= (1 << PD1);
         buttons_update();
         psx_main();
     }
@@ -89,4 +121,25 @@ void psx_on_recv(uint8_t received)
     }
 
     byteNumber++;
+}
+
+ISR(PCINT2_vect)
+{
+    if (PIND & SWITCH_MASK_D)
+    {
+        //the two switches are pressed
+        if (!(TCCR1B & (1 << CS12 | 1 << CS11 | 1 << CS10)))
+        {
+            TCNT1 = DELAY_3S;
+            TCCR1B |= CLK_SOURCE;
+            PORTD |= (1 << PD1);
+        }
+    }
+}
+
+ISR(TIMER1_OVF_vect)
+{
+    //if we managed to overflow, we switch modes and switch off the clock
+    PORTD &= ~(1 << PD1);
+    TCCR1B &= ~((1 << CS12) | (1 << CS11) | (1 << CS10));
 }
