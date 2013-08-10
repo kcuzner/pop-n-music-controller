@@ -1,0 +1,18 @@
+Triangle: Button0
+Circle: Button1
+X: Button2
+Square: Button3
+
+R1: Button7
+R2: Button5
+
+L1: Button6
+L2: Button4
+
+Start: Button9
+Select: Button8
+
+Left: Axis 0 -
+Right: Axis 0 +
+Up: Axis 1 -
+Down: Axis 1 +
