@@ -20,6 +20,7 @@
 
 #include <stdint.h>
 
+#include <avr/eeprom.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
@@ -40,6 +41,11 @@
 
 
 #define EMU_FLAG            0x01
+
+/**
+ * Flags variable, in EEPROM!
+ */
+uint8_t EEMEM flagsEEPROM = 0;
 
 uint8_t flags;
 
@@ -63,8 +69,7 @@ void sync_status()
 
 int main(void)
 {
-    //by default, we are in emulator mode
-    flags = EMU_FLAG;
+    flags = eeprom_read_byte(&flagsEEPROM) & (EMU_FLAG);
 
     //set up psx
     psx_setup();
@@ -165,6 +170,7 @@ ISR(TIMER1_OVF_vect)
 {
     //if we managed to overflow, we switch modes and switch off the clock
     flags ^= EMU_FLAG;
+    eeprom_update_byte(&flagsEEPROM, flags);
     sync_status();
     TCCR1B &= ~((1 << CS12) | (1 << CS11) | (1 << CS10));
 }
