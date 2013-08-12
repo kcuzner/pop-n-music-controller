@@ -36,7 +36,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title ""
-Date "10 aug 2013"
+Date "12 aug 2013"
 Rev ""
 Comp ""
 Comment1 ""
@@ -454,10 +454,6 @@ F 3 "" H 7450 2000 60  0000 C CNN
 $EndComp
 Wire Wire Line
 	7450 1900 7450 2000
-Text Label 5100 3950 0    60   ~ 0
-SCK
-Wire Wire Line
-	4450 3950 5100 3950
 Text Label 6350 3900 0    60   ~ 0
 ACK
 Text Label 5300 3000 0    60   ~ 0
@@ -582,4 +578,5 @@ F 3 "" H 4850 5950 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Connection ~ 4850 5850
+NoConn ~ 4450 3950
 $EndSCHEMATC
